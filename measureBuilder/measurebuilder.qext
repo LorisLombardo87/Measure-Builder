@@ -1,0 +1,9 @@
+{
+	"name" : "measureBuilder",
+	"description" : "Build complex expression",
+	"icon" : "",
+	"type" : "visualization",
+	"version": "0.0.1",
+	"preview" : "measurebuilder.png",
+	"author": "Loris Lombardo"
+}

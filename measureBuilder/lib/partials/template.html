@@ -1,0 +1,201 @@
+<div class = "bootstrap_inside measure-bulder container-fluid" qv-extension style = "overflow: auto; height: 100%;" >
+
+	<div class="row" style = "margin-top: 10px; margin-left: 0px; margin-right: 0px;" ng-if = "maxStep > -1" >
+		<div class="col-md-2">
+			<button type="button" class="btn btn-warning" ng-click = "home()" title = "Back to home">Home</button>
+		</div>
+ 		<div class="col-md-10">
+	 		<div class="form-group">
+	 			<textarea class="form-control" rows="3" readonly>{{
+	 				'$('+measure.name +') = '
+	 				+measure.aggrFunction.funcb+ ' '
+	 				+measure.set.funcb+ ''
+	 				+measure.mods+ ''
+	 				+measure.set.funca+ ' '
+	 				+measure.field+ ' '
+	 				+measure.aggrFunction.funca}}
+	 			</textarea>
+			    
+		  	</div>
+ 		</div>
+	</div>
+
+	<div class="row" ng-if = "maxStep > -1"   style = " margin-left: 0px; margin-right: 0px;">
+		<div class="col-md-12" style = "padding-left:0px; padding-right: 0px;">
+			<ul class="nav nav-tabs nav-justified">
+				<li ng-if = "maxStep > -1" role="presentation" ng-class="{'active': step == 0}" ng-click = "goToStep(0)"><a>Defintion</a></li>
+				<li ng-if = "maxStep > 0" role="presentation" ng-class="{'active': step == 1}" ng-click = "goToStep(1)"><a>Expression</a></li>
+				<li ng-if = "maxStep > 1" role="presentation" ng-class="{'active': step == 2}" ng-click = "goToStep(2)"><a>Set</a></li>
+				<li ng-if = "maxStep > 2" role="presentation" ng-class="{'active': step == 3}" ng-click = "goToStep(3)"><a>Test & Save</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<div ng-if = "step == -1" class="row"  style = "margin-left: 0px; margin-right: 0px; border-left:1px">
+ 		<div class="col-md-12" ><h3>Measure Builder</h3></div>
+ 		<div class="col-md-12" >
+	 		<div class="form-group">
+			    <button type="button" class="btn btn-success btn-block" ng-click = "create()">Create new Measure</button>
+		  	</div>
+		  	or
+		  	<div class="form-group">
+			    <div class="input-group">
+			      <input type="text" class="form-control" placeholder="Variable Name" ng-model = "measure.name"> 
+			      <span class="input-group-btn">
+			        <button class="btn btn-primary" type="button" ng-click = "modify()" title = "You can Only modify measure created with Measure Builder">Modify</button>
+			      </span>
+			    </div>
+		  	</div>
+		  	<div class="alert alert-danger" role="alert" ng-if = "importText" style = "margin-top: 10px;">{{importText}}</div>
+ 		</div>
+	</div>
+	
+	<div ng-if = "step == 0" class="row"  style = "margin-left: 0px; margin-right: 0px;">
+ 		<div class="col-md-12" style = "border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9;"><h3>Some info</h3></div>
+ 		<div class="col-md-12" style = "border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; border-bottom: 1px solid #D9D9D9; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px">
+	 		<div class="form-group">
+			    <label >Name</label>
+			    <input type="text" class="form-control" placeholder="Will be used as variable name" ng-model = "measure.name">
+		  	</div>
+		  	<div class="form-group">
+			    <label >Description</label>
+			    <input type="text" class="form-control" placeholder="Help you to remember what it calculates"  ng-model = "measure.description">
+		  	</div>
+		  	<button type="button" class="btn btn-success" ng-if = "maxStep == 0 && measure.name" ng-click = "stepOver()" style = "margin-bottom: 5px;">Step Over!</button>
+ 		</div>
+	</div>
+
+	<div ng-if = "step == 1" class="row"  style = "margin-left: 0px; margin-right: 0px;">
+	 	<div class="col-md-12" style = "border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9;"><h3>What to Calculate</h3></div>
+ 		<div class="col-md-12" style = "border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; border-bottom: 1px solid #D9D9D9; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px">
+
+ 			<div class="form-group">
+			    <label for="select-aggr-func">Operation to Take</label>
+			    <select 
+					id = "select-aggr-func" 
+				  	ng-model = "measure.aggrFunction" 
+				  	class="form-control" 
+				  	ng-options="item as item.name for item in possAggrFunction">
+				</select>
+		  	</div>
+
+	 		<div class="form-group">
+			    <label >Field</label>
+			    <input type="text" class="form-control" placeholder="Field do you want to operate" ng-model = "measure.field">
+		  	</div>
+		  	
+		  	<button type="button" class="btn btn-success" ng-if = "maxStep == 1 && measure.field && measure.aggrFunction.name" ng-click = "stepOver()" style = "margin-bottom: 5px;">Go ahead!</button>
+ 		</div>
+	 	
+	</div>
+
+	<div ng-if = "step == 2" class="row" style = "margin-top: 5px; margin-left: 0px; margin-right: 0px;">
+		<div class="col-md-12" style = "border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9;"><h3>Where to Calculate</h3></div>
+ 		<div class="col-md-12" style = "border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9;">
+
+ 			<div class="btn-group btn-group-justified" role="group">
+ 				<div class="btn-group" role="group" ng-repeat = "item in possSet">
+				  	<button type="button" 
+				  		class="btn " 
+				  		ng-model = "measure.set"
+				  		ng-class = "{'btn-default':item.id!=measure.set.id,'btn-primary': item.id == measure.set.id}" 
+				  		ng-click = "setDataSet(item)">
+				  		{{item.name}}
+				  	</button>
+				 </div>
+			</div>
+
+ 		</div>
+
+ 		<div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; border-bottom: 1px solid #D9D9D9; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px">
+ 			<ul class="list-group" style = "overflow: auto;">
+
+			  	<li class="list-group-item" ng-repeat = "mod in measure.modifiers">
+			  		<form class="form-inline">
+
+					  	<button class="btn btn-danger pull-right btn-xs" title = "Removes Modifier" ng-click = "removeMod(mod)">X</button>
+
+					  	<div class="form-group">
+					    	<label ng-if = "mod.type != 1" >Select</label>
+					    	<label ng-if = "mod.type == 1" >Clear selection</label>
+					    	<input type="text" class="form-control" placeholder="in Field" ng-model = "mod.field" ng-change = "makeMod()">
+					  	</div>
+
+					  	<div ng-if = "mod.type == 2" class="form-group">
+					    	<label for="exampleInputName2"> = </label>
+					    	<input type="text" class="form-control" placeholder="by Value" ng-model = "mod.value" ng-change = "makeMod()">
+					  	</div>
+
+					  	<div ng-if = "mod.type == 3" class="form-group">
+					    	<label for="exampleInputName2"> = </label>
+					    	<input type="text" class="form-control" placeholder="by Expression Result" ng-model = "mod.value"  ng-change = "makeMod()">
+					  	</div>
+					</form>
+			  	</li>
+
+			  	<li class="list-group-item">
+			  		<div class="btn-group btn-group-justified" role="group">
+
+				  		<div class="btn-group" role="group" >
+						   <button type="button" class="btn btn-default" ng-click = "addModifiers(1)">Clear a Selection</button>
+						</div>
+
+						<div class="btn-group" role="group" >
+						   <button type="button" class="btn btn-default" ng-click = "addModifiers(2)">add by Value</button>
+						</div>
+
+						<div class="btn-group" role="group" >
+						   <button type="button" class="btn btn-default" ng-click = "addModifiers(3)">add by Expression</button>
+						</div>
+
+					</div>
+
+			  	</li>
+
+			</ul>
+
+			<button type="button" class="btn btn-success" ng-if = "maxStep == 2 " ng-click = "stepOver()" style = "margin-bottom: 5px;">Test and Save</button>
+ 		</div>
+	 
+	</div>
+
+	<div ng-if = "step == 3" class="row" style = "padding-top: 5px; margin-left: 0px; margin-right: 0px;">
+	 	<div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9;">
+	 		<form class="form-inline">
+			 	<div class="form-group">
+					    <label >Test Measure over</label>
+					    <input type="text" class="form-control" placeholder="Dimension" ng-model = "measure.testDim">
+				</div>
+
+				<button type="button" class="btn btn-primary pull-right" ng-click = "test()">Test</button>
+				
+			</form>
+			
+		</div>
+		<div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; ">
+			<button type="button" class="btn btn-success btn-block btn-sm" ng-click = "save()">Save</button>
+			<div class="alert alert-success" role="alert" ng-if = "msgText" style = "margin-top: 10px;">{{msgText}}</div>
+	    </div>
+		<div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; border-bottom: 1px solid #D9D9D9; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px">
+			<table class="table table-hover">
+	            <thead>
+	                <tr>
+	                    <th ng-repeat="dim in hyperCube.qHyperCube.qDimensionInfo" ng-bind="dim.qFallbackTitle" ng-click= "clickOn(dim)"/>
+	                    <th ng-repeat="mea in hyperCube.qHyperCube.qMeasureInfo">
+	                        {{mea.qFallbackTitle}}: {{hyperCube.qHyperCube.qGrandTotalRow[$index].qText}}
+	                    </th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <tr ng-repeat="row in hyperCube.qHyperCube.qDataPages[0].qMatrix">
+	                    <td ng-repeat="col in row">
+	                        {{col.qText}}
+	                    </td>
+	                </tr>
+	            </tbody>
+	        </table>
+	    </div>
+
+	</div>
+
+</div>
