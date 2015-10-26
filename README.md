@@ -52,5 +52,6 @@ Only the measure build whit this extension can be modified.
 #Roadmap
 <ul>
 <li>add typeahead for field </li>
+<li>add typeahead for values </li>
 <li>add number format </li>
 </ul>
