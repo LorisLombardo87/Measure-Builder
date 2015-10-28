@@ -14,6 +14,9 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
 
     console.log('Initializing - remove me');
 
+    var _this = this; 
+    console.log(this);
+
     return {
 
         definition: props,
@@ -26,7 +29,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
         template: template,
 
         // Angular Controller
-        controller: ['$scope', function ($scope) {
+        controller: ['$scope', function ($scope, _this) {
 
             // $scope.measure = {};
 
@@ -152,6 +155,50 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
 
             };
 
+            $scope.suggestValue=[];
+            $scope.suggest = function(mod){
+                if(mod.field && mod.value.length>1){
+                    var fields= [];
+                    fields.push(mod.field);
+                    app.searchSuggest([mod.value], {"qSearchFields":fields}, function(reply) {
+
+                        console.log('sugg',reply);
+                        $scope.suggestValue = reply.qResult.qSuggestions;
+                        // var str = "";
+                        // reply.qResult.qSuggestions.forEach(function(sugg){
+                        //     str += sugg.qValue + ' ';
+                        // });
+                        // alert(str);
+                    });
+                }
+            };
+
+            $scope.setValue = function(val, mod){
+                mod.value = val;
+                $scope.suggestValue=[];
+                $scope.makeMod();
+            }
+
+            $scope.fieldSuggest=[];
+            $scope.sactive = '';
+            $scope.suggestField = function(mod, index){
+                if(mod.field.length>1){
+                    app.searchSuggest([mod.field], {}, function(reply) {
+
+                        console.log('sugg',reply);
+                        $scope.fieldSuggest = reply.qResult.qFieldNames;
+                        $scope.sactive = index;
+                    });
+                }
+            };
+
+            $scope.setField = function(val, mod){
+                mod.field = val;
+                $scope.fieldSuggest=[];
+                $scope.makeMod();
+                $scope.sactive = '';
+            }
+
             //step methods
 
             $scope.home = function(){
@@ -231,6 +278,9 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
             };
 
             var app = qlik.currApp(this);
+
+
+            //console.log('dim', _this);
 
             var createHyperCube =  function () {
 
