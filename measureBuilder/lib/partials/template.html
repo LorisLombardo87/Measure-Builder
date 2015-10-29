@@ -84,6 +84,8 @@
 			    <input type="text" class="form-control" placeholder="Field do you want to operate" ng-model = "measure.field" ng-change = "suggestField(measure, 'field')">
 			    
 			    <div class="list-group" ng-if = "sactive == 'field'" style = "position: absolute;z-index: 1000;top: 130px; max-height: 200px; overflow: auto;">
+			    	<a class="list-group-item" ng-click = "setField('', measure)" style = "cursor: pointer;">clear</a>
+			    	<a class="list-group-item" ng-click = "setField(measure.field, measure)" style = "cursor: pointer;">Keep {{measure.field}}</a>
 					<a class="list-group-item" ng-repeat = " s in fieldSuggest" ng-click = "setField(s, measure)" style = "cursor: pointer;">{{s}}</a>
 				</div>
 		  	</div>
@@ -124,16 +126,22 @@
 					    	<label ng-if = "mod.type == 1" >Clear selection</label>
 					    	<input type="text" class="form-control" placeholder="in Field" ng-model = "mod.field" ng-change = "suggestField(mod, $index)" ng-blur = "makeMod()">
 					    	<div class="list-group" ng-if = "sactive == $index" style = "position: absolute;z-index: 1000;top: 45px; max-height: 200px; overflow: auto;">
+
+					  			<a class="list-group-item" ng-click = "setField('', mod)" style = "cursor: pointer;">Clear</a>
 							 	<a class="list-group-item" ng-repeat = " s in fieldSuggest" ng-click = "setField(s, mod)" style = "cursor: pointer;">{{s}}</a>
 							</div>
 					  	</div>
 
 					  	<div ng-if = "mod.type == 2" class="form-group">
 					    	<label for="exampleInputName2"> = </label>
-					    	<input type="text" class="form-control" placeholder="by Value" ng-model = "mod.value" ng-change = "makeMod()">
-					  		<!-- <div class="list-group" ng-if = "suggestValue" style = "position: absolute;z-index: 1000;top: 45px;">
-							  <a class="list-group-item" ng-repeat = " s in suggestValue" ng-click = "setValue(s.qValue, mod)">{{s.qValue}}</a>
-							</div> -->
+					    	<input type="text" class="form-control" placeholder="by Value" ng-model = "mod.value" ng-change = "suggest(mod, $index)" ng-blur = "makeMod()">
+					  		<div class="list-group" ng-if = "svactive == $index" style = "position: absolute;z-index: 1000;top: 45px;">
+					  			<a class="list-group-item" ng-click = "setValue('', mod)"  style = "cursor: pointer;">Clear</a>
+
+					  			<a class="list-group-item" ng-click = "setValue(mod.value, mod)" style = "cursor: pointer;">Keep {{mod.value}}</a>
+
+							  	<a class="list-group-item" ng-repeat = " s in suggestValue" ng-click = "setValue(s.qText, mod)" style = "cursor: pointer;">{{s.qText}}</a>
+							</div>
 					  	</div>
 
 					  	<div ng-if = "mod.type == 3" class="form-group">
@@ -146,16 +154,8 @@
 			  	<li class="list-group-item">
 			  		<div class="btn-group btn-group-justified" role="group">
 
-				  		<div class="btn-group" role="group" >
-						   <button type="button" class="btn btn-default" ng-click = "addModifiers(1)">Clear a Selection</button>
-						</div>
-
-						<div class="btn-group" role="group" >
-						   <button type="button" class="btn btn-default" ng-click = "addModifiers(2)">add by Value</button>
-						</div>
-
-						<div class="btn-group" role="group" >
-						   <button type="button" class="btn btn-default" ng-click = "addModifiers(3)">add by Expression</button>
+				  		<div class="btn-group" role="group" ng-repeat = "mmod in possMods">
+						   <button type="button" class="btn btn-default" ng-click = "addModifiers(mmod.type)">{{mmod.name}}</button>
 						</div>
 
 					</div>
