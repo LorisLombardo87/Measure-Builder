@@ -5,17 +5,15 @@ define([
         './initialproperties',
         './lib/js/extensionUtils',
         'text!./lib/css/scoped-bootstrap.css',
-        'text!./lib/partials/template.html'
+        'text!./lib/partials/template.html',
+        './lib/data/lang',
+        'text!./lib/css/style.css'
 ],
-function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
+function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang, style) {
     'use strict';
 
-    extensionUtils.addStyleToHeader(cssContent);
-
-    console.log('Initializing - remove me');
-
-    var _this = this; 
-    console.log(this);
+    extensionUtils.addStyleToHeader(cssContent, 'scoped-bootstrap');
+     extensionUtils.addStyleToHeader(style, 'style-mb');
 
     return {
 
@@ -29,7 +27,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
         template: template,
 
         // Angular Controller
-        controller: ['$scope', function ($scope, _this) {
+        controller: ['$scope', function ($scope) {
 
             // $scope.measure = {};
 
@@ -51,6 +49,25 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
             // $scope.maxStep = -1 ;
             //$scope.home();
 
+
+            var app = qlik.currApp(this);
+            console.log('app', app);
+            
+            
+            console.log($scope.currLang);
+            if($scope.layout.props.lang != 'd'){
+                $scope.currLang = $scope.layout.props.lang;
+            }
+            else if ($scope.layout.props.lang == 'd'){
+                $scope.currLang = app.model.layout.qLocaleInfo.qCollation.substring(0, 2);
+            }
+            
+            if(lang.poss.indexOf($scope.currLang)==-1){
+                $scope.currLang = 'en';
+            }
+
+            $scope.lang = lang[$scope.currLang];
+
             $scope.isLoading = 0;
 
             $scope.addLoad= function(){
@@ -65,32 +82,32 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
 
             $scope.possAggrFunction = [
                 {
-                    "name": "Sum",
+                    "name": "sum",
                     "funcb": "Sum(",
                     "funca": ")"
                 },
                 {
-                    "name": "Count",
+                    "name": "count",
                     "funcb": "Count(",
                     "funca": ")"
                 },
                 {
-                    "name": "Average",
+                    "name": "avg",
                     "funcb": "Avg(",
                     "funca": ")"
                 },
                 {
-                    "name": "Concat",
+                    "name": "concat",
                     "funcb": "Concat(",
                     "funca": ",',')"
                 }
                 ,{
-                    "name": "Max",
+                    "name": "max",
                     "funcb": "Max(",
                     "funca": ")"
                 }
                 ,{
-                    "name": "Min",
+                    "name": "min",
                     "funcb": "Min(",
                     "funca": ")"
                 }
@@ -98,6 +115,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
             $scope.possSet = [
                 {
                     "name": "on Current Selections",
+                    "langCode": "ocs",
                     "funcb":"{$",
                     "funca":"}",
                     "id": 1
@@ -105,6 +123,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
                 },
                  {
                     "name": "Whole data Set",
+                    "langCode": "wds",
                     "funcb":"{1",
                     "funca":"}",
                     "id": 2
@@ -120,15 +139,18 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
             $scope.possMods = [
                 {
                     "name": "Clear a Selection",
-                    "type":1
+                    "type":1,
+                    "langCode": "csel2"
                 },
                  {
                     "name": "add by Value",
-                    "type":2
+                    "type":2,
+                    "langCode": "abv"
                 },
                 {
                     "name": "add by Expression",
-                    "type":3
+                    "type":3,
+                    "langCode": "abe"
                 }
             ];
 
@@ -324,7 +346,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
                         $scope.maxStep = 3 ;
                     }
                     else{
-                        $scope.importText ='it is Not Possible to modify '+$scope.measure.name+' with measure Builder! You can Only modify measure created with Measure Builder!';
+                        $scope.importText =$scope.lang['npm']+' '+$scope.measure.name+' '+$scope.lang['ycomb'];
                         //console.log('non ci siamo');
                     }
                     $scope.deLoad();
@@ -340,8 +362,6 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
             $scope.goToStep = function(n){
                 $scope.step = n;
             };
-
-            var app = qlik.currApp(this);
 
 
             //console.log('dim', _this);
@@ -360,7 +380,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
                         //qGrouping
                     };
                 qDef.qFieldDefs.push( "="+$scope.measure.testDim);
-                qDef.qFieldLabels.push('Test Dimension');
+                qDef.qFieldLabels.push($scope.measure.testDim);
                 qDef.qSortCriterias.push({qSortByAscii: 1});
 
                 var qDimension = {
@@ -462,8 +482,8 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
                 $scope.measure.definition = $scope.measure.aggrFunction.funcb+ ''
                     +$scope.measure.set.funcb+ ''
                     +$scope.measure.mods+ ''
-                    +$scope.measure.set.funca+ ''
-                    +$scope.measure.field+ ''
+                    +$scope.measure.set.funca+ ' ['
+                    +$scope.measure.field+ '] '
                     +$scope.measure.aggrFunction.funca;
 
                 
@@ -481,7 +501,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
                         function(model){
                             console.log('mod',model);
                             if(model.id){
-                                $scope.msgText = 'Measure Builded! use $('+ $scope.measure.name+') in your chart ';
+                                $scope.msgText = $scope.lang['mb1']+' $('+ $scope.measure.name+') ';
                                 $scope.measure.saved = true;
                             }
                             $scope.deLoad();
@@ -500,7 +520,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template) {
                     .then(
                         function(model){
                             console.log('mod',model);
-                            $scope.msgText = 'Measure Builded! use $('+ $scope.measure.name+') in your chart ';
+                            $scope.msgText = $scope.lang['mb1']+' $('+ $scope.measure.name+') '+ $scope.lang['mb2'];
                             $scope.deLoad();
                         }, 
                         function(reason) {

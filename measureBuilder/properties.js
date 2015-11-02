@@ -2,12 +2,43 @@ define( [], function () {
 	'use strict';
 
 	
-	var testSetting = {
-		ref: "props.test",
-		label: "Test Setting",
+	var lang = {
+		ref: "props.lang",
+		label: "Select Language",
 		type: "string",
-		expression: "optional",
-		show: true
+		show: true,
+		component: 'dropdown',
+		defaultValue: 'd',
+		options: [
+			{
+				value: "d",
+				label: "Autodetect Language"
+			}, 
+			{
+				value: "en",
+				label: "English"
+			}, 
+			{
+				value: "es",
+				label: "Spanish"
+			}, 
+			{
+				value: "de",
+				label: "German"
+			}, 
+			{
+				value: "fr",
+				label: "French"
+			}, 
+			{
+				value: "it",
+				label: "Italian"
+			}, 
+			{
+				value: "nl",
+				label: "Dutch"
+			}
+		]
 	};
 
 	// ****************************************************************************************
@@ -16,13 +47,12 @@ define( [], function () {
 
 	// Appearance Panel
 	var appearancePanel = {
-		uses: "settings",
 		items: {
 			settings: {
 				type: "items",
 				label: "Settings",
 				items: {
-					testSetting: testSetting
+					lang: lang
 				}
 			}
 		}
