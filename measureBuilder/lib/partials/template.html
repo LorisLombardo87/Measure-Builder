@@ -142,7 +142,7 @@
 
 					  	<div ng-if = "mod.type == 2" class="form-group">
 					    	<label for="exampleInputName2"> = </label>
-					    	<input type="text" class="form-control" placeholder="{{lang['bval']}}" ng-model = "mod.value" ng-change = "suggest(mod, $index)" ng-blur = "makeMod()">
+					    	<input type="text" class="form-control" placeholder="{{lang['bval']}}" ng-model = "mod.value" ng-change = "suggest(mod, $index)">
 					  		<div class="list-group" ng-if = "svactive == $index" style = "position: absolute;z-index: 1000;top: 45px;">
 					  			<a class="list-group-item list-group-item-warning" ng-click = "setValue('', mod)"  style = "cursor: pointer;">{{lang['cl']}}</a>
 
@@ -150,6 +150,9 @@
 
 							  	<a class="list-group-item" ng-repeat = " s in suggestValue" ng-click = "setValue(s.qText, mod)" style = "cursor: pointer;">{{s.qText}}</a>
 							</div>
+
+					    	<span class="label label-primary" ng-repeat = "value in mod.values" ng-click = "removeValue(value,mod)">{{value}}</span> 
+
 					  	</div>
 
 					  	<div ng-if = "mod.type == 3" class="form-group">
@@ -185,15 +188,28 @@
 					    <input type="text" class="form-control" placeholder="Dimension" ng-model = "measure.testDim">
 				</div>
 
-				<button type="button" class="btn btn-primary pull-right" ng-click = "test()">{{lang['test']}}</button>
+				
+				
 				
 			</form>
 			
 		</div>
 		<div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; ">
-			<button type="button" class="btn btn-success btn-block btn-sm" ng-click = "save()">{{lang['save']}}</button>
-			<div class="alert alert-success" role="alert" ng-if = "msgText" style = "margin-top: 10px;">{{msgText}}</div>
+			
+			<button type="button" class="btn btn-success" ng-click = "save()">{{lang['save']}}</button>
+			<button type="button" class="btn btn-primary" ng-click = "test()">{{lang['test']}}</button>
+			<button class="btn btn-default" 
+					clipboard text="'$('+measure.name+')'" 
+					on-copied="copySuccess()" 
+					on-error="copyFail(err)"
+					ng-disabled = "!measure.saved">
+			Copy {{'$('+measure.name+')'}}</button>
 	    </div>
+
+	    <div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; ">
+			<div class="alert alert-success" role="alert" ng-if = "msgText">{{msgText}}</div>
+		</div>
+
 		<div class="col-md-12" style = "overflow: auto; padding-top:10px; border-left: 1px solid #D9D9D9; border-right: 1px solid #D9D9D9; border-bottom: 1px solid #D9D9D9; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px">
 			<table class="table table-hover">
 	            <thead>

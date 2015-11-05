@@ -7,7 +7,8 @@ define([
         'text!./lib/css/scoped-bootstrap.css',
         'text!./lib/partials/template.html',
         './lib/data/lang',
-        'text!./lib/css/style.css'
+        'text!./lib/css/style.css',
+        './lib/external/angular-clipboard'
 ],
 function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang, style) {
     'use strict';
@@ -51,10 +52,10 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
 
 
             var app = qlik.currApp(this);
-            console.log('app', app);
+            //console.log('app', app);
             
             
-            console.log($scope.currLang);
+            //console.log($scope.currLang);
             if($scope.layout.props.lang != 'd'){
                 $scope.currLang = $scope.layout.props.lang;
             }
@@ -164,7 +165,8 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     //id: $scope.measure.modifiers.length,
                     type: type,
                     field: '',
-                    value: ''
+                    value: '',
+                    values: []
                 };
                $scope.measure.modifiers.push(mod);
             }
@@ -179,10 +181,14 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                 }
                 
                 angular.forEach($scope.measure.modifiers, function(value, key) {
-                    if((value.type == 1 && value.field )|| ((value.type == 2 || value.type == 3) && (value.field && value.value)) ){
+                    if(
+                        (value.type == 1 && value.field )|| 
+                        (value.type == 2 && value.field && value.values.length>0)||
+                        (value.type == 3 && value.field && value.value)
+                    ){
                         $scope.measure.mods += value.field + '='; 
                         if(value.type == 2){
-                            $scope.measure.mods += '{\'' + value.value + '\'}'; 
+                            $scope.measure.mods += '{\'' + value.values.join("', '") + '\'}'; 
                         }
                         else if(value.type == 3){
                            $scope.measure.mods += '{$(=' + value.value + ')}';
@@ -216,20 +222,20 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     app.searchAssociations([mod.value],{qOffset:0,qCount:15,qMaxNbrFieldMatches:5},{"qSearchFields":fields})
                     .then(
                         function(reply){
-                            console.log('sugg',reply);
+                            //console.log('sugg',reply);
                             $scope.suggestValue = reply.qResults.qFieldDictionaries[0].qResult;
                             $scope.svactive = index;
                             $scope.deLoad();
                         }, 
                         function(reason) {
                             $scope.deLoad();
-                            console.log('Failed: ',reason);
+                            //console.log('Failed: ',reason);
                         }
                     );
 
                     // app.searchSuggest([mod.value], {"qSearchFields":fields}, function(reply) {
 
-                    //     console.log('sugg',reply);
+                    //     //console.log('sugg',reply);
                     //     $scope.suggestValue = reply.qResult.qSuggestions;
                     //     // var str = "";
                     //     // reply.qResult.qSuggestions.forEach(function(sugg){
@@ -245,10 +251,25 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
             };
 
             $scope.setValue = function(val, mod){
-                mod.value = val;
+                if(val.trim()!=''){mod.values.push(val);}
                 $scope.suggestValue=[];
                 $scope.makeMod();
+                mod.value= '';
                 $scope.svactive = 'x';
+            }
+
+            $scope.removeValue = function(val, mod){
+                var index = $scope.measure.modifiers.indexOf(mod);
+                console.log(index);
+                
+                if(val.trim()!=''){
+                    mod.values.splice(mod.values.indexOf(val), 1);
+                }
+                mod.value= val;
+
+                //console.log('mmm',$scope.measure);
+                $scope.makeMod();
+                $scope.svactive = index;
             }
 
             $scope.fieldSuggest=[];
@@ -259,14 +280,14 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     app.searchSuggest([mod.field], {})
                     .then(
                         function(reply) {
-                            console.log('sugg',reply);
+                            //console.log('sugg',reply);
                             $scope.fieldSuggest = reply.qResult.qFieldNames;
                             $scope.sactive = index;
                             $scope.deLoad();
                         }, 
                         function(reason) {
                             $scope.deLoad();
-                            console.log('Failed: ',reason);
+                            //console.log('Failed: ',reason);
                         }
                     );
                 }
@@ -334,20 +355,20 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
 
                 $scope.addLoad();
                 app.variable.getContent($scope.measure.name,function ( reply ) {
-                    console.log('r',reply);
+                    //console.log('r',reply);
                     var val = reply.qContent.qString;
                     var n = val.indexOf("//measurbuilderdef");
-                    console.log('n',n);
+                    //console.log('n',n);
                     if(n > -1){
-                        // console.log('ci siamo');
-                        // console.log('obj',JSON.parse(val.substring(n+18)));
+                        // //console.log('ci siamo');
+                        // //console.log('obj',JSON.parse(val.substring(n+18)));
                         $scope.measure = JSON.parse(val.substring(n+18));
                         $scope.step = 3;
                         $scope.maxStep = 3 ;
                     }
                     else{
                         $scope.importText =$scope.lang['npm']+' '+$scope.measure.name+' '+$scope.lang['ycomb'];
-                        //console.log('non ci siamo');
+                        ////console.log('non ci siamo');
                     }
                     $scope.deLoad();
                 });
@@ -364,7 +385,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
             };
 
 
-            //console.log('dim', _this);
+            ////console.log('dim', _this);
 
             var createHyperCube =  function () {
 
@@ -432,7 +453,7 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     };
                     qMeasures.push(qMeasure);
 
-                //console.log(qMeasures);
+                ////console.log(qMeasures);
 
                 var cubeDef = {
                     qInterColumnSortOrder: [0, 1],
@@ -450,10 +471,10 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     // qNoOfLeftDims
                     // qAlwaysFullyExpanded
                 };
-                console.log('cube def',cubeDef);
+                //console.log('cube def',cubeDef);
                 $scope.addLoad();
                 app.createCube( cubeDef, function ( reply ) {
-                    console.log( 'cube', reply );
+                    //console.log( 'cube', reply );
 
                     $scope.hyperCube =  reply;    
                     $scope.deLoad();
@@ -470,9 +491,9 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
             }
 
             $scope.save = function(){
-                console.log('s');
+                //console.log('s');
                 // app.variable.getByName($scope.measure.name).then(function(model){
-                //    console.log('mod',model);
+                //    //console.log('mod',model);
                 // });
 
                 if(!$scope.measure.set.id){
@@ -499,16 +520,16 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     app.variable.create(qProp)
                     .then(
                         function(model){
-                            console.log('mod',model);
+                            //console.log('mod',model);
                             if(model.id){
-                                $scope.msgText = $scope.lang['mb1']+' $('+ $scope.measure.name+') ';
+                                $scope.msgText = $scope.lang['mb1']+' $('+ $scope.measure.name+') '+ $scope.lang['mb2'];
                                 $scope.measure.saved = true;
                             }
                             $scope.deLoad();
                         }, 
                         function(reason) {
                             $scope.deLoad();
-                            console.log('Failed: ',reason);
+                            //console.log('Failed: ',reason);
                         }
                     );
                 }
@@ -519,23 +540,32 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
                     app.variable.setStringValue( $scope.measure.name,$scope.measure.definition +'//measurbuilderdef'+ JSON.stringify($scope.measure))
                     .then(
                         function(model){
-                            console.log('mod',model);
+                            //console.log('mod',model);
                             $scope.msgText = $scope.lang['mb1']+' $('+ $scope.measure.name+') '+ $scope.lang['mb2'];
                             $scope.deLoad();
                         }, 
                         function(reason) {
                             $scope.deLoad();
-                            console.log('Failed: ',reason);
+                            //console.log('Failed: ',reason);
                         }
                     );
                 }
             };
             
+            $scope.copySuccess = function(){
+                $scope.msgText = 'La variabile è stata copiata negli appunti';
+            };
+
+            $scope.copyFail = function(err){
+                //alert('contenuto non copiato negli appunti');
+                console.log('error while copying', err);
+            };
+
 
             $scope.setUp = function(){
-                // console.log('varValues',varValues);
-                // console.log('varDescs',varDescs);
-                // console.log('ud',useDesc);
+                // //console.log('varValues',varValues);
+                // //console.log('varDescs',varDescs);
+                // //console.log('ud',useDesc);
 
 
                 //item.value as item.label for item in values               
@@ -556,13 +586,13 @@ function ($, qlik, props, initProps, extensionUtils, cssContent, template, lang,
 
                 $scope.addLoad();
                 app.variable.getContent($scope.layout.props.variableName,function ( reply ) {
-                    //console.log('r',reply);
+                    ////console.log('r',reply);
                     $scope.variableValue = reply.qContent.qString; 
                     $scope.variableIndex = $scope.varValues.indexOf($scope.variableValue);
                     $scope.variableValueDesc = $scope.values[$scope.variableIndex].label; 
                     $scope.deLoad(); 
                 });
-                //console.log('v',$scope.values);
+                ////console.log('v',$scope.values);
                
             };
         }]

@@ -47,6 +47,7 @@ define( [], function () {
 
 	// Appearance Panel
 	var appearancePanel = {
+		label: "Settings",
 		items: {
 			settings: {
 				type: "items",
